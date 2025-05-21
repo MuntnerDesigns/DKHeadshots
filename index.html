@@ -13,10 +13,6 @@
       padding: 0;
       text-align: center;
     }
-    .dark-mode {
-      background-color: #111;
-      color: #f5f5f5;
-    }
     header {
       padding: 20px;
     }
@@ -24,6 +20,12 @@
       width: 300px;
       padding: 10px;
       font-size: 16px;
+    }
+    #searchButton {
+      padding: 10px 15px;
+      margin-left: 10px;
+      font-size: 16px;
+      cursor: pointer;
     }
     #results {
       margin-top: 20px;
@@ -35,20 +37,9 @@
     .result:hover {
       background-color: #ddd;
     }
-    .dark-mode .result:hover {
-      background-color: #333;
-    }
     #headshot {
       margin-top: 20px;
       max-height: 300px;
-    }
-    .toggle-button {
-      margin-top: 10px;
-      cursor: pointer;
-      background: none;
-      border: 1px solid #333;
-      padding: 5px 10px;
-      border-radius: 5px;
     }
   </style>
 </head>
@@ -56,7 +47,7 @@
   <header>
     <h1>Player Headshot Search</h1>
     <input type="text" id="searchInput" placeholder="Search player name..." />
-    <button class="toggle-button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <button id="searchButton">Search</button>
   </header>
 
   <div id="results"></div>
@@ -64,11 +55,12 @@
 
   <script>
     const searchInput = document.getElementById('searchInput');
+    const searchButton = document.getElementById('searchButton');
     const resultsDiv = document.getElementById('results');
     const headshotImg = document.getElementById('headshot');
 
     async function fetchESPNMatches(query) {
-      const proxy = "https://corsproxy.io/?";
+      const proxy = "https://api.allorigins.win/raw?url=";
       const url = proxy + encodeURIComponent(`https://site.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(query)}`);
       try {
         const res = await fetch(url);
@@ -97,16 +89,18 @@
       });
     }
 
-    searchInput.addEventListener('input', async () => {
+    async function handleSearch() {
       const query = searchInput.value.trim();
       if (query.length < 2) return;
       const players = await fetchESPNMatches(query);
       renderResults(players);
-    });
-
-    function toggleDarkMode() {
-      document.body.classList.toggle('dark-mode');
     }
+
+    searchButton.addEventListener('click', handleSearch);
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
   </script>
 </body>
 </html>
