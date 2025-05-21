@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Player Headshot Search</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #111;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    .dark-mode {
+      background-color: #111;
+      color: #f5f5f5;
+    }
+    header {
+      padding: 20px;
+    }
+    #searchInput {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    #results {
+      margin-top: 20px;
+    }
+    .result {
+      cursor: pointer;
+      padding: 10px;
+    }
+    .result:hover {
+      background-color: #ddd;
+    }
+    .dark-mode .result:hover {
+      background-color: #333;
+    }
+    #headshot {
+      margin-top: 20px;
+      max-height: 300px;
+    }
+    .toggle-button {
+      margin-top: 10px;
+      cursor: pointer;
+      background: none;
+      border: 1px solid #333;
+      padding: 5px 10px;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Player Headshot Search</h1>
+    <input type="text" id="searchInput" placeholder="Search player name..." />
+    <button class="toggle-button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+  </header>
+
+  <div id="results"></div>
+  <img id="headshot" src="" alt="" hidden />
+
+  <script>
+    const searchInput = document.getElementById('searchInput');
+    const resultsDiv = document.getElementById('results');
+    const headshotImg = document.getElementById('headshot');
+
+    async function fetchESPNMatches(query) {
+      const url = `https://site.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(query)}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      return (data?.items || []).filter(i => i.type === 'player');
+    }
+
+    function renderResults(players) {
+      resultsDiv.innerHTML = '';
+      headshotImg.hidden = true;
+      players.forEach(player => {
+        const div = document.createElement('div');
+        div.className = 'result';
+        div.textContent = `${player?.title?.toUpperCase()} — ${player?.league?.abbreviation}`;
+        div.onclick = () => {
+          const imgUrl = `https://a.espncdn.com/i/headshots/${player.league.abbreviation.toLowerCase()}/players/full/${player.id}.png`;
+          headshotImg.src = imgUrl;
+          headshotImg.alt = player.title;
+          headshotImg.hidden = false;
+        };
+        resultsDiv.appendChild(div);
+      });
+    }
+
+    searchInput.addEventListener('input', async () => {
+      const query = searchInput.value.trim();
+      if (query.length < 2) return;
+      const players = await fetchESPNMatches(query);
+      renderResults(players);
+    });
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+    }
+  </script>
+</body>
+</html>
