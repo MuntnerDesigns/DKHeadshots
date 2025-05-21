@@ -68,10 +68,16 @@
     const headshotImg = document.getElementById('headshot');
 
     async function fetchESPNMatches(query) {
-      const url = `https://site.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(query)}`;
-      const res = await fetch(url);
-      const data = await res.json();
-      return (data?.items || []).filter(i => i.type === 'player');
+      const proxy = "https://corsproxy.io/?";
+      const url = proxy + encodeURIComponent(`https://site.api.espn.com/apis/common/v3/search?query=${encodeURIComponent(query)}`);
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        return (data?.items || []).filter(i => i.type === 'player');
+      } catch (err) {
+        console.error('Fetch failed', err);
+        return [];
+      }
     }
 
     function renderResults(players) {
